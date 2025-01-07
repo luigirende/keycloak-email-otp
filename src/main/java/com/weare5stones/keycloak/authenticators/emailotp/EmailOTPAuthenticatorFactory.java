@@ -19,6 +19,7 @@ public class EmailOTPAuthenticatorFactory implements AuthenticatorFactory {
   public static final String CONFIG_PROP_ALLOW_LOWERCASE = "allowLowercase";
   public static final String CONFIG_PROP_ALLOW_NUMBERS = "allowNumbers";
   public static final String CONFIG_PROP_MAX_RETRIES = "maxRetries";
+  public static final String CONFIG_PROP_CREATE_FORM = "createForm";
 
   @Override
   public String getId() {
@@ -27,7 +28,7 @@ public class EmailOTPAuthenticatorFactory implements AuthenticatorFactory {
 
   @Override
   public String getDisplayType() {
-    return "Email TOTP Authentication";
+    return "Email TOTP Authentication for API";
   }
 
   @Override
@@ -80,7 +81,11 @@ public class EmailOTPAuthenticatorFactory implements AuthenticatorFactory {
         new ProviderConfigProperty(CONFIG_PROP_ALLOW_LOWERCASE, "Allow Lowercase",
             "Should the TOTP code contain lowercase letters?", ProviderConfigProperty.BOOLEAN_TYPE, true),
         new ProviderConfigProperty(CONFIG_PROP_ALLOW_NUMBERS, "Allow Numbers", "Should the TOTP code contain numbers?",
-            ProviderConfigProperty.BOOLEAN_TYPE, true));
+            ProviderConfigProperty.BOOLEAN_TYPE, true),
+        new ProviderConfigProperty(CONFIG_PROP_CREATE_FORM, "Form mode",
+            "Create a Form, disabled usefule for authenticate the OTP via API cli.",
+            ProviderConfigProperty.BOOLEAN_TYPE, true)
+    );
   }
 
   @Override

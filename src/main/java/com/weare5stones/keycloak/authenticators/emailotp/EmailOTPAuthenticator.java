@@ -17,6 +17,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.util.JsonSerialization;
 
 public class EmailOTPAuthenticator implements Authenticator {
 
@@ -77,8 +78,25 @@ public class EmailOTPAuthenticator implements Authenticator {
                 TOTP_EMAIL,
                 attributes);
       }
-
-      context.challenge(context.form().setAttribute("realm", context.getRealm()).createForm(TOTP_FORM));
+      Boolean createForm = Boolean.parseBoolean(
+        config.getConfig()
+          .getOrDefault(
+            EmailOTPAuthenticatorFactory.CONFIG_PROP_CREATE_FORM,
+            "true"));
+      if (createForm) {
+        context.challenge(context.form().setAttribute("realm", context.getRealm()).createForm(TOTP_FORM));
+      } else {
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("code", code);
+        responseMap.put("ttl", ttl);
+        responseMap.put("userId", context.getAuthenticationSession().getAuthenticatedUser().getId());
+        responseMap.put("tabId", context.getAuthenticationSession().getTabId());
+        responseMap.put("sessionId", context.getAuthenticationSession().getParentSession().getId());
+        responseMap.put("realm", context.getAuthenticationSession().getParentSession().getRealm().getName());
+        String jsonResponse = JsonSerialization.mapper.writeValueAsString(responseMap);
+        context.challenge(Response.ok().entity(jsonResponse).build());
+        //context.success();//challenge(context.form().setAttribute("realm", context.getRealm()).createCode());
+      }
     } catch (Exception e) {
       logger.error("An error occurred when attempting to email an TOTP auth:", e);
       context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR,
